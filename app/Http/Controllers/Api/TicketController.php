@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTicketRequest;
+use App\Http\Requests\UpdateTicketRequest;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use PHPUnit\Framework\Attributes\Ticket as AttributesTicket;
 
 class TicketController extends Controller
 {
@@ -54,20 +56,22 @@ class TicketController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Ticket $ticket)
     {
-        try {
-            $showTicket = Ticket::findOrFail($id);
-            return response()->json([$showTicket, 200]);
-        } catch(\Exception $ex){
-            return response()->json(['error' => 'Chamado não encontrado']);
-        }
-    }
+        $ticket->load([
+            'creator',
+            'assignee',
+            'comments.user',
+        ]);
 
+        return response()->json([
+            'ticket' => $ticket,
+        ]);
+    }
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreTicketRequest $request, string $id)
+    public function update(UpdateTicketRequest $request, string $id)
     {
         $data = $request->validated();
 
